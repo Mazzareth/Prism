@@ -18,4 +18,16 @@ body {
   color: var(--foreground);
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
+  @apply transition-colors duration-300 ease-in-out;
+}
+body.day-mode {
+  @apply bg-white text-gray-800;
+}
+
+body.dusk-mode {
+  @apply bg-gradient-to-r from-indigo-800 via-purple-600 to-pink-500 text-white;
+}
+
+body.night-mode {
+   @apply bg-gray-900 text-gray-100;
 }

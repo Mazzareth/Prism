@@ -1,8 +1,7 @@
-// src/app/components/layout/Header.tsx
 "use client";
-import React, { useState } from 'react';
+import React, { useState, Fragment, useEffect } from 'react';
 import Link from 'next/link';
-import { Menu, Transition } from '@headlessui/react';
+import { Menu, Transition, Listbox } from '@headlessui/react';
 import {
   Bars3Icon,
   XMarkIcon,
@@ -11,17 +10,54 @@ import {
   PhotoIcon,
   PencilSquareIcon,
   UsersIcon,
+  Cog8ToothIcon,
+  CheckIcon,
 } from '@heroicons/react/24/outline';
-import Image from 'next/image';
 
 interface NavItem {
   href: string;
   label: string;
-  icon?: React.ComponentType<{ className?: string }>; // Make icon optional
+  icon?: React.ComponentType<{ className?: string }>;
 }
+
+interface Theme {
+    name: string;
+    value: 'Day' | 'Dusk' | 'Night'; // Restrict the type here
+}
+
+const themes: Theme[] = [
+  { name: 'Day', value: 'Day' },
+  { name: 'Dusk', value: 'Dusk' },
+  { name: 'Night', value: 'Night' },
+];
 
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [selectedTheme, setSelectedTheme] = useState<Theme>(themes[0]);
+
+    useEffect(() => {
+        const storedTheme = localStorage.getItem('theme');
+        if (storedTheme) {
+            const theme = themes.find((t) => t.value === storedTheme);
+            if (theme) {
+                setSelectedTheme(theme);
+                document.body.classList.remove('day-mode', 'dusk-mode', 'night-mode');
+                document.body.classList.add(`${theme.value.toLowerCase()}-mode`);
+
+            }
+        } else {
+            // Set initial theme class if nothing stored in localStorage.
+             document.body.classList.add("day-mode");
+        }
+    }, []);
+
+  const changeTheme = (theme: Theme) => {
+    setSelectedTheme(theme);
+    localStorage.setItem('theme', theme.value);
+
+    document.body.classList.remove('day-mode', 'dusk-mode', 'night-mode');
+    document.body.classList.add(`${theme.value.toLowerCase()}-mode`);
+  };
 
   const navItems: NavItem[] = [
     { href: '/', label: 'Home', icon: HomeIcon },
@@ -42,13 +78,12 @@ export default function Header() {
         <div className="flex items-center justify-between">
           {/* Logo / Brand */}
           <Link href="/" className="flex items-center space-x-2">
-          <Image src="/logo.svg" alt="ArtHaven Logo" width={40} height={40} />
             <span className="text-3xl font-extrabold tracking-tight">
               Prism
             </span>
           </Link>
 
-          {/* Desktop Navigation and Auth */}
+          {/* Desktop Navigation, Auth, and Settings */}
           <div className="hidden md:flex items-center space-x-8">
             <nav className="flex space-x-8">
               {navItems.map((item) => (
@@ -57,7 +92,7 @@ export default function Header() {
                   href={item.href}
                   className="flex items-center space-x-1 text-lg hover:text-yellow-300 transition duration-300 ease-in-out"
                 >
-                   {item.icon && <item.icon className="h-6 w-6" />}
+                  {item.icon && <item.icon className="h-6 w-6" />}
                   <span>{item.label}</span>
                 </Link>
               ))}
@@ -73,20 +108,60 @@ export default function Header() {
                 </Link>
               ))}
             </div>
+
+            <Listbox value={selectedTheme} onChange={changeTheme}>
+              <div className="relative">
+                <Listbox.Button className="p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                  <span className="sr-only">Change Theme</span>
+                  <Cog8ToothIcon className="w-6 h-6 text-white hover:text-yellow-300" />
+                </Listbox.Button>
+                <Transition
+                  as={Fragment}
+                  leave="transition ease-in duration-100"
+                  leaveFrom="opacity-100"
+                  leaveTo="opacity-0"
+                >
+                  <Listbox.Options className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10">
+                    {themes.map((theme) => (
+                      <Listbox.Option
+                        key={theme.value}
+                        className={({ active }) =>
+                          `relative cursor-default select-none py-2 pl-10 pr-4 ${
+                            active ? 'bg-yellow-100 text-gray-900' : 'text-gray-900'
+                          }`
+                        }
+                        value={theme}
+                      >
+                        {({ selected }) => (
+                          <>
+                            <span
+                              className={`block truncate ${
+                                selected ? 'font-medium' : 'font-normal'
+                              }`}
+                            >
+                              {theme.name}
+                            </span>
+                            {selected ? (
+                              <span className="absolute inset-y-0 left-0 flex items-center pl-3">
+                                <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                              </span>
+                            ) : null}
+                          </>
+                        )}
+                      </Listbox.Option>
+                    ))}
+                  </Listbox.Options>
+                </Transition>
+              </div>
+            </Listbox>
           </div>
 
           {/* Mobile Menu Button */}
           <div className="md:hidden">
             <Menu as="div" className="relative inline-block text-left">
-              <div>
-                <Menu.Button
-                  className="text-white hover:text-yellow-300 focus:outline-none focus:text-yellow-300"
-                  aria-label="Toggle mobile menu"
-                >
-                  <Bars3Icon className="h-7 w-7" />
-                </Menu.Button>
-              </div>
+              {/* ... (Menu.Button is the same) */}
               <Transition
+                as={Fragment}
                 enter="transition ease-out duration-100"
                 enterFrom="transform opacity-0 scale-95"
                 enterTo="transform opacity-100 scale-100"
@@ -101,17 +176,69 @@ export default function Header() {
                         {({ active }) => (
                           <Link
                             href={item.href}
-                           onClick={() => setIsMobileMenuOpen(false)}
+                            onClick={() => setIsMobileMenuOpen(false)}
                             className={`${
                               active ? 'bg-yellow-300 text-gray-800' : 'text-gray-900'
                             } group flex w-full items-center rounded-md px-2 py-2 text-sm`}
                           >
-                             {item.icon &&  <item.icon className="mr-2 h-5 w-5" />}
+                            {item.icon && <item.icon className="mr-2 h-5 w-5" />}
                             {item.label}
                           </Link>
                         )}
                       </Menu.Item>
                     ))}
+                     <Menu.Item>
+                    <Listbox value={selectedTheme} onChange={changeTheme}>
+                        <div className="relative">
+                        <Listbox.Button className="p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 w-full text-left">
+                            <span className="sr-only">Change Theme</span>
+                            <span className="flex items-center">
+                            <Cog8ToothIcon className="w-5 h-5 mr-2 text-gray-900" />
+                            <span>
+                                {selectedTheme.name}
+                            </span>
+                            </span>
+                        </Listbox.Button>
+                        <Transition
+                                as={Fragment}
+                                leave="transition ease-in duration-100"
+                                leaveFrom="opacity-100"
+                                leaveTo="opacity-0"
+                            >
+                                <Listbox.Options className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10">
+                            {themes.map((theme) => (
+                            <Listbox.Option
+                                key={theme.value}
+                                className={({ active }) =>
+                                `relative cursor-default select-none py-2 pl-10 pr-4 ${
+                                active ? 'bg-yellow-100 text-gray-900' : 'text-gray-900'
+                                }`
+                                }
+                                value={theme}
+                            >
+                                {({ selected }) => (
+                                <>
+                                    <span
+                                    className={`block truncate ${
+                                        selected ? 'font-medium' : 'font-normal'
+                                    }`}
+                                    >
+                                    {theme.name}
+                                    </span>
+                                    {selected ? (
+                                    <span className="absolute inset-y-0 left-0 flex items-center pl-3">
+                                        <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                                    </span>
+                                    ) : null}
+                                </>
+                                )}
+                            </Listbox.Option>
+                            ))}
+                        </Listbox.Options>
+                        </Transition>
+                    </div>
+                    </Listbox>
+                  </Menu.Item>
                   </div>
                 </Menu.Items>
               </Transition>
