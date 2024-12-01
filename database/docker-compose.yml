@@ -1,9 +1,0 @@
-services:
-  db:
-    build: .
-    ports:
-      - "5432:5432"
-    environment:
-      POSTGRES_DB: prism_db
-      POSTGRES_USER: Mazzy
-      POSTGRES_PASSWORD: Emilylove12
