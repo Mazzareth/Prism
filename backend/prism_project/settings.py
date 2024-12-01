@@ -26,11 +26,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'rest_framework',                   # DRF
-    'corsheaders',                      # CORS
-    'rest_framework_simplejwt',        # JWT Authentication
-    'core'                           # Your core app
-    # ... other apps as you add them
+    'rest_framework',
+    'corsheaders',
+    'rest_framework_simplejwt',
+    'core'
 ]
 
 MIDDLEWARE = [
@@ -70,13 +69,15 @@ WSGI_APPLICATION = 'prism_project.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'prism',  # Your database name
-        'USER': os.environ.get('POSTGRES_USER'), # From environment variables
+        'NAME': 'prism',
+        'USER': os.environ.get('POSTGRES_USER'),
         'PASSWORD': os.environ.get('POSTGRES_PASSWORD'),
-        'HOST': 'db', # Docker service name
+        'HOST': 'db',
         'PORT': 5432,
     }
 }
+
+
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
@@ -164,3 +165,5 @@ SIMPLE_JWT = {
     'SLIDING_TOKEN_LIFETIME': timedelta(minutes=5),
     'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
 }
+
+AUTH_USER_MODEL = 'core.User'
