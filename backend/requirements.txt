@@ -3,3 +3,4 @@ django-cors-headers
 djangorestframework-simplejwt
 psycopg2-binary
 python-dotenv
+gunicorn==21.2.0
