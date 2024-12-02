@@ -2,6 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Existing styles from your CSS... */
 body {
   background-color: #282c34;
   color: #f8f8f2;
@@ -194,4 +195,94 @@ body::before {
     top: calc(var(--mouse-y) + 30px);
     left: var(--mouse-x);
   }
+}
+
+/* --- Vaporwave Modal Styles --- */
+.modal-overlay {
+  @apply fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center;
+}
+
+.modal-content {
+  @apply relative w-full max-w-md mx-auto my-6 bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-700 rounded-lg p-8 shadow-2xl outline-none focus:outline-none;
+  box-shadow: 0 0 20px #90caf9, 0 0 30px #ff00d6;
+}
+
+.modal-header {
+  @apply flex items-center justify-between border-b-2 border-pink-500 pb-4 mb-6;
+}
+
+.modal-title {
+    @apply text-3xl font-bold text-sky-300 tracking-wider;
+  font-family: 'scan', sans-serif;
+}
+
+.modal-close-button {
+    @apply text-pink-300 hover:text-pink-400 focus:outline-none text-3xl transition-all duration-300 ease-in-out hover:scale-110;
+}
+
+.modal-body {
+  @apply relative p-6 flex-auto;
+}
+
+.form-group {
+    @apply mb-6;
+}
+
+.form-label {
+    @apply block text-sky-200 text-sm font-bold mb-2;
+}
+
+.form-input {
+  @apply w-full rounded-md border border-gray-700 bg-gray-800 px-4 py-3 text-sky-200 shadow-sm focus:border-pink-500 focus:outline-none focus:ring-1 focus:ring-pink-500;
+  transition: border-color 0.3s ease-in-out;
+}
+
+.modal-footer {
+  @apply flex items-center justify-end pt-4 mt-4 border-t-2 border-pink-500;
+}
+
+.modal-close-button-alt {
+    @apply inline-block px-6 py-2 text-sm font-bold uppercase outline-none focus:outline-none mr-2 rounded-md border-2 border-sky-300 text-sky-300 hover:text-pink-300 hover:border-pink-300 transition-colors duration-300 relative overflow-hidden z-10 before:absolute before:top-0 before:left-0 before:w-full before:h-full before:bg-gradient-to-r before:from-transparent before:via-sky-300/40 before:to-transparent before:z-0 before:-translate-x-full hover:before:translate-x-full before:transition-transform before:duration-500;
+}
+
+.neon-highlight2 {
+  @apply text-vapor-light relative; /* Use text-vapor-light instead of text-white */
+  font-size: 0.875rem; /* Adjust font size as needed */
+  font-weight: 500; /* Add font weight */
+  text-shadow: 0 0 5px #90caf9, 0 0 10px #ff00d6; /* Add a subtle text-shadow */
+}
+
+/* Menu Item Styles */
+
+.vaporwave-menu-item {
+  @apply block w-full text-left px-4 py-2 text-sm text-vapor-blue transition-colors duration-300 relative; /* Changed text color to vapor-blue */
+  font-family: 'digital', monospace;
+
+  &::before {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: linear-gradient(to right, #90caf9, #ff00d6); /* Use the vaporwave gradient */
+      transition: width 0.3s ease-in-out;
+      z-index: -1;
+  }
+  &:hover {
+      @apply text-vapor-green;
+  }
+
+  &:hover::before {
+      width: 100%;
+  }
+}
+
+
+.toggle-checkbox {
+  @apply appearance-none w-6 h-6 rounded-full bg-gray-400 checked:bg-vapor-pink transition-all duration-300; /* Vaporwave pink when checked */
+}
+
+.toggle-checkbox:checked {
+  box-shadow: 0 0 0 2px white inset, 0 0 10px #FF00D6; /* Add glow effect when checked */
 }
