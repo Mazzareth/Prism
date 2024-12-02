@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "generate-api": "openapi-generator-cli generate -i APISPEC.json -g typescript-axios -o app/services/api --additional-properties=withSeparateModelsAndApi=true --api-package=api --model-package=models"
   },
   "dependencies": {
     "react": "19.0.0-rc-66855b96-20241106",

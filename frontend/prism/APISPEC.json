@@ -1,0 +1,969 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "Prism API",
+        "description": "API for Prism project",
+        "termsOfService": "https://www.example.com/terms/",
+        "contact": {
+            "email": "mercysquadrant@gmail.com"
+        },
+        "license": {
+            "name": "MIT License"
+        },
+        "version": "v1"
+    },
+    "host": "localhost:8000",
+    "schemes": [
+        "http"
+    ],
+    "basePath": "/api/v1",
+    "consumes": [
+        "application/json"
+    ],
+    "produces": [
+        "application/json"
+    ],
+    "securityDefinitions": {
+        "Basic": {
+            "type": "basic"
+        }
+    },
+    "security": [
+        {
+            "Basic": []
+        }
+    ],
+    "paths": {
+        "/artists/{username}/": {
+            "get": {
+                "operationId": "artists_read",
+                "summary": "Get artist profile.",
+                "description": "Retrieves the profile of a specific artist, including their content.",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Artist"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "detail": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                },
+                "tags": [
+                    "Artist"
+                ]
+            },
+            "parameters": [
+                {
+                    "name": "username",
+                    "in": "path",
+                    "required": true,
+                    "type": "string"
+                }
+            ]
+        },
+        "/auth/login/": {
+            "post": {
+                "operationId": "auth_login_create",
+                "summary": "Login an existing user.",
+                "description": "Authenticates a user with the provided username/email and password.\nReturns the user data and tokens upon successful authentication.",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "required": [
+                                "username_or_email",
+                                "password"
+                            ],
+                            "type": "object",
+                            "properties": {
+                                "username_or_email": {
+                                    "description": "Username or Email",
+                                    "type": "string"
+                                },
+                                "password": {
+                                    "description": "Password",
+                                    "type": "string",
+                                    "format": "password"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/User"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                },
+                "tags": [
+                    "Authentication"
+                ]
+            },
+            "parameters": []
+        },
+        "/auth/logout/": {
+            "post": {
+                "operationId": "auth_logout_create",
+                "summary": "Logout a user.",
+                "description": "Blacklists the provided refresh token to log the user out.",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "required": [
+                                "refresh_token"
+                            ],
+                            "type": "object",
+                            "properties": {
+                                "refresh_token": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "message": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                },
+                "tags": [
+                    "Authentication"
+                ]
+            },
+            "parameters": []
+        },
+        "/auth/me/": {
+            "get": {
+                "operationId": "auth_me_list",
+                "summary": "Get current user's profile.",
+                "description": "Returns the data of the currently authenticated user.",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/User"
+                        }
+                    }
+                },
+                "tags": [
+                    "Authentication"
+                ]
+            },
+            "parameters": []
+        },
+        "/auth/register/": {
+            "post": {
+                "operationId": "auth_register_create",
+                "summary": "Register a new user.",
+                "description": "Registers a new user with the provided username, email, and password.\nReturns the user data and tokens upon successful registration.",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/User"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/User"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "username": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                },
+                                "email": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                },
+                                "password": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "tags": [
+                    "Authentication"
+                ]
+            },
+            "parameters": []
+        },
+        "/auth/token/refresh/": {
+            "post": {
+                "operationId": "auth_token_refresh_create",
+                "description": "Takes a refresh type JSON web token and returns an access type JSON web\ntoken if the refresh token is valid.",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/TokenRefresh"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/TokenRefresh"
+                        }
+                    }
+                },
+                "tags": [
+                    "auth"
+                ]
+            },
+            "parameters": []
+        },
+        "/content/": {
+            "post": {
+                "operationId": "content_create",
+                "summary": "Create new content.",
+                "description": "Allows authenticated users to create new content items.",
+                "parameters": [
+                    {
+                        "name": "title",
+                        "in": "formData",
+                        "required": false,
+                        "type": "string",
+                        "maxLength": 255,
+                        "x-nullable": true
+                    },
+                    {
+                        "name": "image",
+                        "in": "formData",
+                        "required": true,
+                        "type": "string",
+                        "maxLength": 255,
+                        "minLength": 1
+                    },
+                    {
+                        "name": "nsfw",
+                        "in": "formData",
+                        "required": false,
+                        "type": "boolean"
+                    },
+                    {
+                        "name": "tags",
+                        "in": "formData",
+                        "required": true,
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "uniqueItems": true
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/Content"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/Content"
+                        }
+                    }
+                },
+                "consumes": [
+                    "multipart/form-data",
+                    "application/x-www-form-urlencoded"
+                ],
+                "tags": [
+                    "Content"
+                ]
+            },
+            "parameters": []
+        },
+        "/content/{content_id}/": {
+            "get": {
+                "operationId": "content_read",
+                "summary": "Get content details.",
+                "description": "Retrieves details of a specific content item.",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Content"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "detail": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                },
+                "tags": [
+                    "Content"
+                ]
+            },
+            "parameters": [
+                {
+                    "name": "content_id",
+                    "in": "path",
+                    "required": true,
+                    "type": "string"
+                }
+            ]
+        },
+        "/content/{content_id}/delete/": {
+            "delete": {
+                "operationId": "content_delete_delete",
+                "summary": "Delete content.",
+                "description": "Allows the content owner to delete a specific content item.",
+                "parameters": [],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "detail": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                },
+                "tags": [
+                    "Content"
+                ]
+            },
+            "parameters": [
+                {
+                    "name": "content_id",
+                    "in": "path",
+                    "required": true,
+                    "type": "string"
+                }
+            ]
+        },
+        "/following/{artist_username}/": {
+            "post": {
+                "operationId": "following_create",
+                "summary": "Follow an artist.",
+                "description": "Allows authenticated users to follow a specific artist.",
+                "parameters": [],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "message": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "detail": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                },
+                "tags": [
+                    "Following"
+                ]
+            },
+            "delete": {
+                "operationId": "following_delete",
+                "summary": "Unfollow an artist.",
+                "description": "Allows authenticated users to unfollow a specific artist.",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "message": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                },
+                "tags": [
+                    "Following"
+                ]
+            },
+            "parameters": [
+                {
+                    "name": "artist_username",
+                    "in": "path",
+                    "required": true,
+                    "type": "string"
+                }
+            ]
+        },
+        "/likes/{content_id}/": {
+            "post": {
+                "operationId": "likes_create",
+                "summary": "Like content.",
+                "description": "Allows authenticated users to like a specific content item.",
+                "parameters": [],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "message": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "detail": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                },
+                "tags": [
+                    "Likes"
+                ]
+            },
+            "delete": {
+                "operationId": "likes_delete",
+                "summary": "# Correct indentation here\nUnlike content.",
+                "description": "Allows authenticated users to unlike a specific content item.",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "message": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                },
+                "tags": [
+                    "Likes"
+                ]
+            },
+            "parameters": [
+                {
+                    "name": "content_id",
+                    "in": "path",
+                    "required": true,
+                    "type": "string"
+                }
+            ]
+        },
+        "/tags/": {
+            "get": {
+                "operationId": "tags_list",
+                "summary": "List tags.",
+                "description": "Retrieves a list of all available tags.",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Tag"
+                            }
+                        }
+                    }
+                },
+                "tags": [
+                    "Tags"
+                ]
+            },
+            "parameters": []
+        },
+        "/users/me/": {
+            "put": {
+                "operationId": "users_me_update",
+                "summary": "Update user profile.",
+                "description": "Allows authenticated users to update their own profile.",
+                "parameters": [
+                    {
+                        "name": "username",
+                        "in": "formData",
+                        "description": "Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.",
+                        "required": true,
+                        "type": "string",
+                        "pattern": "^[\\w.@+-]+$",
+                        "maxLength": 150,
+                        "minLength": 1
+                    },
+                    {
+                        "name": "email",
+                        "in": "formData",
+                        "required": false,
+                        "type": "string",
+                        "format": "email",
+                        "maxLength": 254
+                    },
+                    {
+                        "name": "password",
+                        "in": "formData",
+                        "required": false,
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    {
+                        "name": "is_artist",
+                        "in": "formData",
+                        "required": false,
+                        "type": "boolean"
+                    },
+                    {
+                        "name": "profile_picture",
+                        "in": "formData",
+                        "required": false,
+                        "type": "string",
+                        "maxLength": 255,
+                        "x-nullable": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/User"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/User"
+                        }
+                    }
+                },
+                "consumes": [
+                    "multipart/form-data",
+                    "application/x-www-form-urlencoded"
+                ],
+                "tags": [
+                    "User"
+                ]
+            },
+            "parameters": []
+        },
+        "/users/{username}/": {
+            "get": {
+                "operationId": "users_read",
+                "summary": "Get user profile.",
+                "description": "Retrieves the public profile of a specific user.",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/PublicUser"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "detail": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                },
+                "tags": [
+                    "User"
+                ]
+            },
+            "parameters": [
+                {
+                    "name": "username",
+                    "in": "path",
+                    "required": true,
+                    "type": "string"
+                }
+            ]
+        }
+    },
+    "definitions": {
+        "PublicUser": {
+            "required": [
+                "username"
+            ],
+            "type": "object",
+            "properties": {
+                "id": {
+                    "title": "ID",
+                    "type": "integer",
+                    "readOnly": true
+                },
+                "username": {
+                    "title": "Username",
+                    "description": "Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.",
+                    "type": "string",
+                    "pattern": "^[\\w.@+-]+$",
+                    "maxLength": 150,
+                    "minLength": 1
+                },
+                "is_artist": {
+                    "title": "Is artist",
+                    "type": "boolean"
+                },
+                "profile_picture": {
+                    "title": "Profile picture",
+                    "type": "string",
+                    "maxLength": 255,
+                    "x-nullable": true
+                }
+            }
+        },
+        "Content": {
+            "required": [
+                "image",
+                "tags"
+            ],
+            "type": "object",
+            "properties": {
+                "id": {
+                    "title": "ID",
+                    "type": "integer",
+                    "readOnly": true
+                },
+                "artist": {
+                    "$ref": "#/definitions/PublicUser"
+                },
+                "title": {
+                    "title": "Title",
+                    "type": "string",
+                    "maxLength": 255,
+                    "x-nullable": true
+                },
+                "image": {
+                    "title": "Image",
+                    "type": "string",
+                    "maxLength": 255,
+                    "minLength": 1
+                },
+                "nsfw": {
+                    "title": "Nsfw",
+                    "type": "boolean"
+                },
+                "created_at": {
+                    "title": "Created at",
+                    "type": "string",
+                    "format": "date-time",
+                    "readOnly": true
+                },
+                "tags": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "uniqueItems": true
+                }
+            }
+        },
+        "Artist": {
+            "required": [
+                "username"
+            ],
+            "type": "object",
+            "properties": {
+                "id": {
+                    "title": "ID",
+                    "type": "integer",
+                    "readOnly": true
+                },
+                "username": {
+                    "title": "Username",
+                    "description": "Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.",
+                    "type": "string",
+                    "pattern": "^[\\w.@+-]+$",
+                    "maxLength": 150,
+                    "minLength": 1
+                },
+                "is_artist": {
+                    "title": "Is artist",
+                    "type": "boolean"
+                },
+                "profile_picture": {
+                    "title": "Profile picture",
+                    "type": "string",
+                    "maxLength": 255,
+                    "x-nullable": true
+                },
+                "content_items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Content"
+                    },
+                    "readOnly": true
+                },
+                "followers": {
+                    "title": "Followers",
+                    "type": "string",
+                    "readOnly": true
+                },
+                "following": {
+                    "title": "Following",
+                    "type": "string",
+                    "readOnly": true
+                }
+            }
+        },
+        "User": {
+            "required": [
+                "username"
+            ],
+            "type": "object",
+            "properties": {
+                "id": {
+                    "title": "ID",
+                    "type": "integer",
+                    "readOnly": true
+                },
+                "username": {
+                    "title": "Username",
+                    "description": "Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.",
+                    "type": "string",
+                    "pattern": "^[\\w.@+-]+$",
+                    "maxLength": 150,
+                    "minLength": 1
+                },
+                "email": {
+                    "title": "Email address",
+                    "type": "string",
+                    "format": "email",
+                    "maxLength": 254
+                },
+                "password": {
+                    "title": "Password",
+                    "type": "string",
+                    "minLength": 1
+                },
+                "is_artist": {
+                    "title": "Is artist",
+                    "type": "boolean"
+                },
+                "access_token": {
+                    "title": "Access token",
+                    "type": "string",
+                    "readOnly": true,
+                    "minLength": 1
+                },
+                "refresh_token": {
+                    "title": "Refresh token",
+                    "type": "string",
+                    "readOnly": true,
+                    "minLength": 1
+                },
+                "profile_picture": {
+                    "title": "Profile picture",
+                    "type": "string",
+                    "maxLength": 255,
+                    "x-nullable": true
+                }
+            }
+        },
+        "TokenRefresh": {
+            "required": [
+                "refresh"
+            ],
+            "type": "object",
+            "properties": {
+                "refresh": {
+                    "title": "Refresh",
+                    "type": "string",
+                    "minLength": 1
+                },
+                "access": {
+                    "title": "Access",
+                    "type": "string",
+                    "readOnly": true,
+                    "minLength": 1
+                }
+            }
+        },
+        "Tag": {
+            "required": [
+                "name"
+            ],
+            "type": "object",
+            "properties": {
+                "id": {
+                    "title": "ID",
+                    "type": "integer",
+                    "readOnly": true
+                },
+                "name": {
+                    "title": "Name",
+                    "type": "string",
+                    "maxLength": 255,
+                    "minLength": 1
+                }
+            }
+        }
+    }
+}

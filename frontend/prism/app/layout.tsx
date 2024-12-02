@@ -14,9 +14,6 @@ export default function RootLayout({
         <main>
            {children}
         </main>
-        <footer className="p-4 bg-vapor-dark text-vapor-pink text-center font-scan">
-          <p>Prism © {new Date().getFullYear()}</p>
-        </footer>
       </body>
     </html>
   )
