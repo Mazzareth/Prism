@@ -5,7 +5,7 @@
         "description": "API for Prism project",
         "termsOfService": "https://www.example.com/terms/",
         "contact": {
-            "email": "mercysquadrant@gmail.com"
+            "email": "contact@prism.example.com"
         },
         "license": {
             "name": "MIT License"
@@ -295,8 +295,60 @@
             "parameters": []
         },
         "/content/": {
+            "get": {
+                "operationId": "content_list",
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "A page number within the paginated result set.",
+                        "required": false,
+                        "type": "integer"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "required": [
+                                "count",
+                                "results"
+                            ],
+                            "type": "object",
+                            "properties": {
+                                "count": {
+                                    "type": "integer"
+                                },
+                                "next": {
+                                    "type": "string",
+                                    "format": "uri",
+                                    "x-nullable": true
+                                },
+                                "previous": {
+                                    "type": "string",
+                                    "format": "uri",
+                                    "x-nullable": true
+                                },
+                                "results": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/definitions/Content"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "tags": [
+                    "content"
+                ]
+            },
+            "parameters": []
+        },
+        "/content/create/": {
             "post": {
-                "operationId": "content_create",
+                "operationId": "content_create_create",
                 "summary": "Create new content.",
                 "description": "Allows authenticated users to create new content items.",
                 "parameters": [
@@ -312,9 +364,7 @@
                         "name": "image",
                         "in": "formData",
                         "required": true,
-                        "type": "string",
-                        "maxLength": 255,
-                        "minLength": 1
+                        "type": "file"
                     },
                     {
                         "name": "nsfw",
@@ -451,12 +501,7 @@
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "type": "object",
-                            "properties": {
-                                "message": {
-                                    "type": "string"
-                                }
-                            }
+                            "$ref": "#/definitions/Following"
                         }
                     },
                     "400": {
@@ -492,16 +537,8 @@
                 "description": "Allows authenticated users to unfollow a specific artist.",
                 "parameters": [],
                 "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "properties": {
-                                "message": {
-                                    "type": "string"
-                                }
-                            }
-                        }
+                    "204": {
+                        "description": "No Content"
                     },
                     "404": {
                         "description": "Not Found",
@@ -538,12 +575,7 @@
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "type": "object",
-                            "properties": {
-                                "message": {
-                                    "type": "string"
-                                }
-                            }
+                            "$ref": "#/definitions/Likes"
                         }
                     },
                     "400": {
@@ -575,20 +607,12 @@
             },
             "delete": {
                 "operationId": "likes_delete",
-                "summary": "# Correct indentation here\nUnlike content.",
+                "summary": "Unlike content.",
                 "description": "Allows authenticated users to unlike a specific content item.",
                 "parameters": [],
                 "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "properties": {
-                                "message": {
-                                    "type": "string"
-                                }
-                            }
-                        }
+                    "204": {
+                        "description": "No Content"
                     },
                     "404": {
                         "description": "Not Found",
@@ -679,8 +703,14 @@
                         "name": "profile_picture",
                         "in": "formData",
                         "required": false,
+                        "type": "file",
+                        "x-nullable": true
+                    },
+                    {
+                        "name": "bio",
+                        "in": "formData",
+                        "required": false,
                         "type": "string",
-                        "maxLength": 255,
                         "x-nullable": true
                     }
                 ],
@@ -776,12 +806,16 @@
                     "type": "string",
                     "maxLength": 255,
                     "x-nullable": true
+                },
+                "bio": {
+                    "title": "Bio",
+                    "type": "string",
+                    "x-nullable": true
                 }
             }
         },
         "Content": {
             "required": [
-                "image",
                 "tags"
             ],
             "type": "object",
@@ -803,8 +837,8 @@
                 "image": {
                     "title": "Image",
                     "type": "string",
-                    "maxLength": 255,
-                    "minLength": 1
+                    "readOnly": true,
+                    "format": "uri"
                 },
                 "nsfw": {
                     "title": "Nsfw",
@@ -922,7 +956,13 @@
                 "profile_picture": {
                     "title": "Profile picture",
                     "type": "string",
-                    "maxLength": 255,
+                    "readOnly": true,
+                    "x-nullable": true,
+                    "format": "uri"
+                },
+                "bio": {
+                    "title": "Bio",
+                    "type": "string",
                     "x-nullable": true
                 }
             }
@@ -943,6 +983,46 @@
                     "type": "string",
                     "readOnly": true,
                     "minLength": 1
+                }
+            }
+        },
+        "Following": {
+            "required": [
+                "user",
+                "artist"
+            ],
+            "type": "object",
+            "properties": {
+                "user": {
+                    "title": "User",
+                    "type": "integer"
+                },
+                "artist": {
+                    "title": "Artist",
+                    "type": "integer"
+                },
+                "created_at": {
+                    "title": "Created at",
+                    "type": "string",
+                    "format": "date-time",
+                    "readOnly": true
+                }
+            }
+        },
+        "Likes": {
+            "required": [
+                "user",
+                "content"
+            ],
+            "type": "object",
+            "properties": {
+                "user": {
+                    "title": "User",
+                    "type": "integer"
+                },
+                "content": {
+                    "title": "Content",
+                    "type": "integer"
                 }
             }
         },

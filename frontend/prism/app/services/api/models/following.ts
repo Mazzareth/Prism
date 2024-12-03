@@ -17,14 +17,26 @@
 /**
  * 
  * @export
- * @interface AuthLogoutCreateRequest
+ * @interface Following
  */
-export interface AuthLogoutCreateRequest {
+export interface Following {
+    /**
+     * 
+     * @type {number}
+     * @memberof Following
+     */
+    'user': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof Following
+     */
+    'artist': number;
     /**
      * 
      * @type {string}
-     * @memberof AuthLogoutCreateRequest
+     * @memberof Following
      */
-    'refresh_token': string;
+    'created_at'?: string;
 }
 

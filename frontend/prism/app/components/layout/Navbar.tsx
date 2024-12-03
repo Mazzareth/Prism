@@ -8,7 +8,6 @@ import {
     User as UserIcon,
     Palette as ArtistsIcon,
     Search as BrowseIcon,
-    UserCircle as ProfileIcon,
     LucideIcon, // Import the LucideIcon type
 } from 'lucide-react';
 
@@ -24,7 +23,6 @@ const navLinks: NavLink[] = [
     { href: "/", label: "Home", icon: HomeIcon },
     { href: "/artists", label: "Artists", icon: ArtistsIcon },
     { href: "/browse", label: "Browse", icon: BrowseIcon },
-    { href: "/profile", label: "Profile", icon: ProfileIcon },
 ];
 
 export default function Navbar() {

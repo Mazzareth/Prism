@@ -29,8 +29,8 @@ urlpatterns = [
     path('auth/me/', MeView.as_view(), name='auth_me'),
 
     # Content
-    path('content/', ContentCreateView.as_view(), name='content_create'),
     path('content/', ContentListView.as_view(), name='content_list'),
+    path('content/create/', ContentCreateView.as_view(), name='content_create'),
     path('content/<int:content_id>/', ContentDetailView.as_view(), name='content_detail'),
     path('content/<int:content_id>/delete/', ContentDeleteView.as_view(), name='content_delete'),
 

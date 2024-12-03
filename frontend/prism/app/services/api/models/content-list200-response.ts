@@ -13,42 +13,39 @@
  */
 
 
+// May contain unused imports in some cases
+// @ts-ignore
+import type { Content } from './content';
 
 /**
  * 
  * @export
- * @interface PublicUser
+ * @interface ContentList200Response
  */
-export interface PublicUser {
+export interface ContentList200Response {
     /**
      * 
      * @type {number}
-     * @memberof PublicUser
+     * @memberof ContentList200Response
      */
-    'id'?: number;
-    /**
-     * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
-     * @type {string}
-     * @memberof PublicUser
-     */
-    'username': string;
-    /**
-     * 
-     * @type {boolean}
-     * @memberof PublicUser
-     */
-    'is_artist'?: boolean;
+    'count': number;
     /**
      * 
      * @type {string}
-     * @memberof PublicUser
+     * @memberof ContentList200Response
      */
-    'profile_picture'?: string | null;
+    'next'?: string | null;
     /**
      * 
      * @type {string}
-     * @memberof PublicUser
+     * @memberof ContentList200Response
      */
-    'bio'?: string | null;
+    'previous'?: string | null;
+    /**
+     * 
+     * @type {Array<Content>}
+     * @memberof ContentList200Response
+     */
+    'results': Array<Content>;
 }
 

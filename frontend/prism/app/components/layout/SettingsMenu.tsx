@@ -6,36 +6,33 @@ import { ToggleLeft, ToggleRight } from "lucide-react";
 
 // Define a type for the settings
 type Setting = {
-  index: number;
+  id: string; // Changed index to id for better identification and keying
   label: string;
   state: boolean;
   toggle: () => void;
 };
 
 export default function SettingsMenu() {
-    // Initial state using a more descriptive structure
     const [settings, setSettings] = useState<Setting[]>([
-        { index: 0, label: "Test Setting 1", state: false, toggle: () => {} },
-        { index: 1, label: "Test Setting 2", state: true, toggle: () => {} },
-        { index: 2, label: "Test Setting 3", state: false, toggle: () => {} },
+        { id: "setting-1", label: "Test Setting 1", state: false, toggle: () => {} },
+        { id: "setting-2", label: "Test Setting 2", state: true, toggle: () => {} },
+        { id: "setting-3", label: "Test Setting 3", state: false, toggle: () => {} },
     ]);
     
-    // Correctly initialize settings with the toggle function once
-    // using the functional update form of useState and useEffect
     useEffect(() => {
         setSettings((prevSettings) =>
           prevSettings.map((setting) => ({
               ...setting,
-              toggle: () => toggleSetting(setting.index),
+              toggle: () => toggleSetting(setting.id),
           }))
         );
-    }, []);  // Empty dependency array ensures this runs only once after initial render
+    }, []);
     
-    // Memoize the toggle function to prevent unnecessary re-renders
-    const toggleSetting = useCallback((index: number) => {
+
+    const toggleSetting = useCallback((id: string) => {
         setSettings((prevSettings) =>
           prevSettings.map((setting) =>
-            setting.index === index
+            setting.id === id
               ? { ...setting, state: !setting.state }
               : setting
           )
@@ -60,7 +57,7 @@ export default function SettingsMenu() {
         <Menu.Items className="absolute right-0 mt-2 w-56 origin-top-right divide-y divide-gray-600 rounded-md bg-gray-800 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
           <div className="py-1">
             {settings.map((setting) => (
-              <Menu.Item key={setting.index}>
+              <Menu.Item key={setting.id}>
                 {({ active }) => (
                   <div
                     onClick={setting.toggle}

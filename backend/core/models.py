@@ -5,6 +5,7 @@ from django.contrib.auth.models import AbstractUser
 class User(AbstractUser):
     profile_picture = models.CharField(max_length=255, null=True, blank=True)
     is_artist = models.BooleanField(default=False)
+    bio = models.TextField(null=True, blank=True)  # Added bio field
 
     def __str__(self):
         return self.username

@@ -41,17 +41,14 @@ class LikesAdmin(admin.ModelAdmin):
 class CustomUserAdmin(UserAdmin):
     list_display = ('id', 'username', 'email', 'is_artist', 'is_staff')
     list_filter = ('is_artist', 'is_staff')
-    fieldsets = (
-        (None, {'fields': ('username', 'password')}),
-        ('Personal info', {'fields': ('email', 'profile_picture', 'is_artist')}),
-        ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
-        ('Important dates', {'fields': ('last_login', 'date_joined')}),
+
+    # The key change is here: using UserAdmin's standard fieldsets
+    fieldsets = UserAdmin.fieldsets + (
+        ('Artist Info', {'fields': ('is_artist', 'profile_picture')}),  # Profile picture moved here
     )
-    add_fieldsets = (
-        (None, {
-            'classes': ('wide',),
-            'fields': ('username', 'email', 'password', 'is_artist'),
-        }),
+
+    add_fieldsets = UserAdmin.add_fieldsets + (
+        ('Artist Info', {'fields': ('is_artist', 'profile_picture')}), # Profile picture moved here
     )
 
 # Register your models with their custom ModelAdmin classes

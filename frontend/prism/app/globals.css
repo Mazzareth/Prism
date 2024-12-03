@@ -286,3 +286,17 @@ body::before {
 .toggle-checkbox:checked {
   box-shadow: 0 0 0 2px white inset, 0 0 10px #FF00D6; /* Add glow effect when checked */
 }
+
+.font-scan {
+  font-family: 'scan', sans-serif; /* Assuming you have this font imported */
+}
+
+/* Styling for profile information container */
+.profile-info {
+@apply bg-gray-800 rounded-lg p-6 shadow-md; /* Example styling */
+}
+
+.content-item-placeholder {  /* Styles for placeholder content items */
+  @apply border border-gray-700 rounded-lg p-4 mb-4;
+  background-color: rgba(39, 39, 39, 0.8); /* Example styling - subtle dark background */
+}

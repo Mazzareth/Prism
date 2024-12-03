@@ -17,14 +17,20 @@
 /**
  * 
  * @export
- * @interface AuthLogoutCreateRequest
+ * @interface Likes
  */
-export interface AuthLogoutCreateRequest {
+export interface Likes {
     /**
      * 
-     * @type {string}
-     * @memberof AuthLogoutCreateRequest
+     * @type {number}
+     * @memberof Likes
      */
-    'refresh_token': string;
+    'user': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof Likes
+     */
+    'content': number;
 }
 

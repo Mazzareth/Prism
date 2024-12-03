@@ -1,6 +1,5 @@
 .gitignore
 .npmignore
-.openapi-generator-ignore
 api.ts
 api/artist-api.ts
 api/auth-api.ts
@@ -22,8 +21,11 @@ models/auth-login-create400-response.ts
 models/auth-logout-create-request.ts
 models/auth-logout-create200-response.ts
 models/auth-register-create400-response.ts
+models/content-list200-response.ts
 models/content.ts
+models/following.ts
 models/index.ts
+models/likes.ts
 models/public-user.ts
 models/tag.ts
 models/token-refresh.ts

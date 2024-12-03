@@ -13,6 +13,7 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.parsers import MultiPartParser, FormParser
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
+from typing import Union
 
 User = get_user_model()
 
@@ -30,7 +31,6 @@ class RegisterView(APIView):
                     'username': openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Schema(type=openapi.TYPE_STRING)),
                     'email': openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Schema(type=openapi.TYPE_STRING)),
                     'password': openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Schema(type=openapi.TYPE_STRING)),
-                    # Add other error fields as necessary
                 }
             ))
         },
@@ -93,12 +93,7 @@ class LoginView(APIView):
 
         user = authenticate(request, username=username_or_email, password=password)
         if user is None:
-            try:
-                user = User.objects.get(email=username_or_email)
-                if not user.check_password(password):
-                    user = None
-            except User.DoesNotExist:
-                user = None
+          user = self._authenticate_by_email(username_or_email, password)    
 
         if user:
             refresh = RefreshToken.for_user(user)
@@ -108,6 +103,17 @@ class LoginView(APIView):
             return Response(data, status=status.HTTP_200_OK)
         return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
     
+    def _authenticate_by_email(self, username_or_email: str, password: str) -> Union[User, None]:
+      """ Helper function to check for authentication by email
+      """
+      try:
+        user = User.objects.get(email=username_or_email)
+        if user.check_password(password):
+          return user
+      except User.DoesNotExist:
+        return None
+      return None
+
 class LogoutView(APIView):
     @swagger_auto_schema(
         request_body=openapi.Schema(
@@ -172,8 +178,23 @@ class MeView(APIView):
         """
         serializer = UserSerializer(request.user)
         return Response(serializer.data, status=status.HTTP_200_OK)
-
+    
 # --- Content Views ---
+
+class TagListView(generics.ListAPIView):
+    queryset = Tag.objects.all()
+    serializer_class = TagSerializer
+    # ... any methods like get_queryset if you have overridden default behaviour
+    @swagger_auto_schema(tags=['Tags'])
+    def get(self, request, *args, **kwargs):
+        """
+        List tags.
+
+        Retrieves a list of all available tags.
+        """
+        return super().get(request, *args, **kwargs)
+    
+    
 class ContentCreateView(APIView):
     permission_classes = [IsAuthenticated]
     parser_classes = [MultiPartParser, FormParser]
@@ -354,22 +375,19 @@ class ArtistProfileView(APIView):
         artist = get_object_or_404(User, username=username, is_artist=True)
         serializer = ArtistSerializer(artist)
         return Response(serializer.data, status=status.HTTP_200_OK)
-
 # --- Following/Liking Views ---
+
 class FollowArtistView(APIView):
     permission_classes = [IsAuthenticated]
 
     @swagger_auto_schema(
         responses={
-            201: openapi.Response('Created', openapi.Schema(
-                type=openapi.TYPE_OBJECT,
-                properties={'message': openapi.Schema(type=openapi.TYPE_STRING)}
-            )),
+            201: openapi.Response('Created', FollowingSerializer),  # Return serializer data
             400: openapi.Response('Bad Request', openapi.Schema(
                 type=openapi.TYPE_OBJECT,
                 properties={'error': openapi.Schema(type=openapi.TYPE_STRING)}
             )),
-             404: openapi.Response('Not Found', openapi.Schema(
+            404: openapi.Response('Not Found', openapi.Schema(
                 type=openapi.TYPE_OBJECT,
                 properties={'detail': openapi.Schema(type=openapi.TYPE_STRING)}
             ))
@@ -388,16 +406,14 @@ class FollowArtistView(APIView):
 
         following, created = Following.objects.get_or_create(user=request.user, artist=artist)
         if created:
-            return Response({"message": f"You are now following {artist_username}."}, status=status.HTTP_201_CREATED)
+            serializer = FollowingSerializer(following) # Serialize the following object.
+            return Response(serializer.data, status=status.HTTP_201_CREATED) # Return data, not message
         else:
             return Response({"error": "You are already following this artist."}, status=status.HTTP_400_BAD_REQUEST)
 
     @swagger_auto_schema(
         responses={
-            200: openapi.Response('OK', openapi.Schema(
-                type=openapi.TYPE_OBJECT,
-                properties={'message': openapi.Schema(type=openapi.TYPE_STRING)}
-            )),
+            204: openapi.Response('No Content'), # Correct status code on successful deletion
             404: openapi.Response('Not Found', openapi.Schema(
                 type=openapi.TYPE_OBJECT,
                 properties={'error': openapi.Schema(type=openapi.TYPE_STRING)}
@@ -415,7 +431,7 @@ class FollowArtistView(APIView):
         try:
             following = Following.objects.get(user=request.user, artist=artist)
             following.delete()
-            return Response({"message": f"You have unfollowed {artist_username}."}, status=status.HTTP_200_OK)
+            return Response(status=status.HTTP_204_NO_CONTENT) # Use correct 204 status
         except Following.DoesNotExist:
             return Response({"error": "You are not following this artist."}, status=status.HTTP_404_NOT_FOUND)
 
@@ -424,10 +440,7 @@ class LikeContentView(APIView):
 
     @swagger_auto_schema(
         responses={
-            201: openapi.Response('Created', openapi.Schema(
-                type=openapi.TYPE_OBJECT,
-                properties={'message': openapi.Schema(type=openapi.TYPE_STRING)}
-            )),
+            201: openapi.Response('Created', LikesSerializer), # Return serializer data
             400: openapi.Response('Bad Request', openapi.Schema(
                 type=openapi.TYPE_OBJECT,
                 properties={'error': openapi.Schema(type=openapi.TYPE_STRING)}
@@ -449,16 +462,14 @@ class LikeContentView(APIView):
         content = get_object_or_404(Content, id=content_id)
         like, created = Likes.objects.get_or_create(user=request.user, content=content)
         if created:
-            return Response({"message": "Content liked."}, status=status.HTTP_201_CREATED)
+            serializer = LikesSerializer(like) # Serialize like object
+            return Response(serializer.data, status=status.HTTP_201_CREATED) # Return created like data
         else:
             return Response({"error": "You have already liked this content."}, status=status.HTTP_400_BAD_REQUEST)
 
     @swagger_auto_schema(
         responses={
-            200: openapi.Response('OK', openapi.Schema(
-                type=openapi.TYPE_OBJECT,
-                properties={'message': openapi.Schema(type=openapi.TYPE_STRING)}
-            )),
+            204: openapi.Response('No Content'),  # 204 for successful delete
             404: openapi.Response('Not Found', openapi.Schema(
                 type=openapi.TYPE_OBJECT,
                 properties={'error': openapi.Schema(type=openapi.TYPE_STRING)}
@@ -467,31 +478,15 @@ class LikeContentView(APIView):
         tags=['Likes']
     )
     def delete(self, request, content_id):
-            """  # Correct indentation here
-            Unlike content.
-
-            Allows authenticated users to unlike a specific content item.
-            """
-            content = get_object_or_404(Content, id=content_id)
-            try:
-                like = Likes.objects.get(user=request.user, content=content)
-                like.delete()
-                return Response({"message": "Content unliked."}, status=status.HTTP_200_OK)
-            except Likes.DoesNotExist:
-                return Response({"error": "You have not liked this content."}, status=status.HTTP_404_NOT_FOUND)
-
-# --- Tagging Views ---
-class TagListView(generics.ListAPIView):
-    queryset = Tag.objects.all()
-    serializer_class = TagSerializer
-
-    @swagger_auto_schema(tags=['Tags'])
-    def get(self, request, *args, **kwargs):
-         """
-        List tags.
-
-        Retrieves a list of all available tags.
         """
-         return super().get(request, *args, **kwargs)
-    
-    
+        Unlike content.
+
+        Allows authenticated users to unlike a specific content item.
+        """
+        content = get_object_or_404(Content, id=content_id)
+        try:
+            like = Likes.objects.get(user=request.user, content=content)
+            like.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT) # 204 status
+        except Likes.DoesNotExist:
+            return Response({"error": "You have not liked this content."}, status=status.HTTP_404_NOT_FOUND)

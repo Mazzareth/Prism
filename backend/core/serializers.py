@@ -1,20 +1,30 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from rest_framework_simplejwt.tokens import RefreshToken
+from .models import User, Content, Tag, Following, Likes, ContentTag
 from django.contrib.auth.hashers import make_password
-from .models import Content, Tag, Following, Likes, ContentTag
 
 User = get_user_model()
 
-# Existing User Serializer (modified for update)
+def lowercase_username_email(data):
+    if 'username' in data:
+        data['username'] = data['username'].lower()
+    if 'email' in data:
+        data['email'] = data['email'].lower()
+    return data
+
 class UserSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True, required=False)  # Allow password to be optional for updates
-    access_token = serializers.CharField(read_only=True, required=False) # Allow access_token to be optional for updates
-    refresh_token = serializers.CharField(read_only=True, required=False) # Allow refresh_token to be optional for updates
+    password = serializers.CharField(write_only=True, required=False)
+    access_token = serializers.CharField(read_only=True, required=False)
+    refresh_token = serializers.CharField(read_only=True, required=False)
+    profile_picture = serializers.ImageField(required=False, allow_null=True)
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'password', 'is_artist', 'access_token', 'refresh_token', 'profile_picture']
+        fields = ['id', 'username', 'email', 'password', 'is_artist', 'access_token', 'refresh_token', 'profile_picture', 'bio']
+    def to_internal_value(self, data):
+        data = super().to_internal_value(data)
+        return lowercase_username_email(data)
 
     def create(self, validated_data):
         if 'password' in validated_data:
@@ -40,37 +50,46 @@ class UserSerializer(serializers.ModelSerializer):
         instance.save()
         return instance
 
-# Public User Serializer (for viewing profiles)
 class PublicUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'username', 'is_artist', 'profile_picture']
+        fields = ['id', 'username', 'is_artist', 'profile_picture', 'bio']
 
-# Content Serializer
 class ContentSerializer(serializers.ModelSerializer):
-    artist = PublicUserSerializer(read_only=True)  # Nest the public user details
+    artist = PublicUserSerializer(read_only=True)
     tags = serializers.SlugRelatedField(many=True, slug_field='name', queryset=Tag.objects.all())
+    image = serializers.ImageField(required=True, allow_empty_file=False)
 
     class Meta:
         model = Content
         fields = ['id', 'artist', 'title', 'image', 'nsfw', 'created_at', 'tags']
-        read_only_fields = ['artist'] # Prevent artist from being directly updatable
+        read_only_fields = ['artist']
 
     def create(self, validated_data):
         tags_data = validated_data.pop('tags', [])
+        if not isinstance(tags_data, list):
+            raise serializers.ValidationError("Tags must be a list of strings")  # Explicitly check for list
+
         content = Content.objects.create(artist=self.context['request'].user, **validated_data)
+
         for tag_name in tags_data:
-            tag, created = Tag.objects.get_or_create(name=tag_name)
+            if not isinstance(tag_name, str):  # Check if each tag is a string
+                raise serializers.ValidationError("Each tag must be a string")
+            tag, created = Tag.objects.get_or_create(name=tag_name.lower())
             ContentTag.objects.create(content=content, tag=tag)
         return content
 
-# Tag Serializer
 class TagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
         fields = ['id', 'name']
 
-# Artist Serializer (for detailed artist info)
+    def to_internal_value(self, data):
+        data = super().to_internal_value(data)
+        if 'name' in data:
+            data['name'] = data['name'].lower()
+        return data
+
 class ArtistSerializer(serializers.ModelSerializer):
     content_items = ContentSerializer(many=True, read_only=True)
     followers = serializers.SerializerMethodField()
@@ -86,19 +105,24 @@ class ArtistSerializer(serializers.ModelSerializer):
     def get_following(self, obj):
         return obj.following_users.count()
 
-# Content Tag Join Table Serializer - Helper Serializer not directly exposed through API
 class ContentTagSerializer(serializers.ModelSerializer):
     class Meta:
         model = ContentTag
         fields = ['content', 'tag']
 
-# Following Serializer - Helper Serializer not directly exposed through API
 class FollowingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Following
         fields = ['user', 'artist', 'created_at']
 
-# Likes Serializer - Helper Serializer not directly exposed through API
+    def to_internal_value(self, data):
+        data = super().to_internal_value(data)
+        if 'user' in data and isinstance(data['user'], dict):
+            data['user'] = lowercase_username_email(data['user'])
+        if 'artist' in data and isinstance(data['artist'], dict):
+            data['artist'] = lowercase_username_email(data['artist'])
+        return data
+
 class LikesSerializer(serializers.ModelSerializer):
     class Meta:
         model = Likes
