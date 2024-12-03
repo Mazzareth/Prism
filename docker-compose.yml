@@ -1,7 +1,9 @@
+version: "3.9"
+
 services:
   web:
     build:
-      context: ./backend 
+      context: ./backend
       dockerfile: Dockerfile
     ports:
       - "8000:8000"
@@ -16,8 +18,17 @@ services:
     depends_on:
       - db
     command: >
-      sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+      sh -c "python manage.py migrate && gunicorn prism.wsgi:application -b 0.0.0.0:8000"
 
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./backend/staticfiles:/staticfiles
+    depends_on:
+      - web
   db:
     image: postgres:14
     environment:

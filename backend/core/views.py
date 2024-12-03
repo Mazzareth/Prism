@@ -14,8 +14,12 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from typing import Union
+from django.http import HttpResponseRedirect
 
 User = get_user_model()
+
+def home_view(request):
+    return HttpResponseRedirect('http://localhost:3000')
 
 # --- Authentication Views ---
 class RegisterView(APIView):
@@ -194,7 +198,7 @@ class TagListView(generics.ListAPIView):
         """
         return super().get(request, *args, **kwargs)
     
-    
+
 class ContentCreateView(APIView):
     permission_classes = [IsAuthenticated]
     parser_classes = [MultiPartParser, FormParser]
